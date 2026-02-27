@@ -1,0 +1,80 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+\usepackage{xcolor}
+
+\title{\textbf{Deconstructing Kolmogorov-Arnold Networks (KANs) \\ Part 3: Scaling, Benchmarking, and Parameter Efficiency}}
+\author{Sovesh Mohapatra}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section*{Introduction}
+Over the past two weeks, we have deconstructed Kolmogorov-Arnold Networks (KANs). In Part 1, we explored the foundational mathematics of replacing fixed node activations with learnable, dynamic 1D edge functions. In Part 2, we brought the theory to life, writing a highly optimized 1D KAN layer in pure PyTorch that calculates B-spline curves natively on the GPU.
+
+Today, in the final part of our mini-series, we answer the most critical question: \textit{Does this mathematically elegant architecture actually perform better than a standard Multi-Layer Perceptron (MLP)?} 
+
+To answer this, we will dive into a practical benchmark focusing on symbolic regression—a task where KANs theoretically hold a massive advantage.
+
+\section*{The Experiment: Symbolic Regression}
+Symbolic regression is the task of discovering a mathematical expression that best fits a given dataset. MLPs historically struggle with this. Because MLPs rely on piecewise linear approximations (via ReLUs) or simple sigmoidal curves, they struggle to model high-frequency oscillations or multiplicative interactions without requiring massive width and depth.
+
+KANs, however, inherently try to represent the data using localized polynomial splines, which are perfectly suited for tracing out symbolic mathematical curves.
+
+\subsection*{The Target Function}
+To push both models to their limits, we attempt to fit the following highly non-linear, oscillatory target function:
+
+\begin{equation}
+y = \sin(3x) + \cos(5x) \cdot \exp(-x^2)
+\end{equation}
+
+The function exhibits both high-frequency localized oscillations (due to the $5x$ and exponential decay) and lower-frequency global waves (due to the $3x$).
+
+\section*{Model Architecture \& Parameters}
+To ensure a fair comparison regarding learning capacity, we must consider the vastly different ways parameters are distributed in MLPs vs KANs.
+
+For an MLP, the parameters are the weight matrices $W \in \mathbb{R}^{out \times in}$. A network with layers [1, 32, 32, 1] requires:
+\begin{itemize}
+    \item $L_1$: $1 \times 32 + 32 = 64$ parameters
+    \item $L_2$: $32 \times 32 + 32 = 1056$ parameters
+    \item $L_3$: $32 \times 1 + 1 = 33$ parameters
+\end{itemize}
+Total MLP Parameters $\approx \mathbf{1,150}$
+
+For a KAN, the parameters are the spline coefficients. For an edge connecting node $i$ to node $j$, the number of parameters is $(grid\_size + spline\_order)$. The total parameters per layer are $in \times out \times (grid\_size + spline\_order)$.
+
+We construct a much smaller KAN: [1, 4, 1] with a grid size of 10 and spline order of 3 (13 parameters per edge):
+\begin{itemize}
+    \item $L_1$: $1 \times 4 \times 13 = 52$ parameters
+    \item $L_2$: $4 \times 1 \times 13 = 52$ parameters
+    \item Base weights: $\approx 8$
+\end{itemize}
+Total KAN Parameters $\approx \mathbf{112}$
+
+Notice that the KAN has \textbf{10x fewer parameters} than the MLP!
+
+\section*{Results: The Power of Splines}
+We trained both networks using the Adam optimizer (learning rate $0.001$) and Mean Squared Error (MSE) loss for 10,000 epochs. 
+
+Despite operating at a massive parameter deficit, the KAN substantially outperformed the MLP in both training speed and final test loss.
+
+\begin{itemize}
+    \item \textbf{The MLP} struggled to trace the high-frequency peaks of the function. The linear ReLUs attempted to form jagged approximations of the smooth curves. The loss plateaued early, stubbornly remaining around $0.0118$ MSE.
+    \item \textbf{The KAN} essentially traced the function perfectly. Because the edges themselves are parameterized as B-splines, the model simply warped its 1D edge functions into the exact shape of the underlying symbolic curve. The ability of the grid to "lock on" to the local features allowed the KAN to achieve a remarkable near-zero MSE ($\approx 0.00013$).
+\end{itemize}
+
+\section*{Conclusion: Are KANs the Future?}
+The benchmark results are compelling. For scientific computing, solving partial differential equations (PDEs), or modeling complex physical systems, KANs represent a massive step forward in parameter efficiency and interpretability.
+
+However, KANs are currently slower to process on modern hardware than massive dense matrix multiplications. The challenge for the community moving forward will be optimizing the CUDA kernels for evaluating B-splines at scale to allow KANs to compete with MLPs in billion-parameter language modeling tasks.
+
+This concludes our "Deconstructing KANs" series. The math is beautiful, the implementation is tractable, and the results speak for themselves. The paradigm of deep learning is expanding, and learning to write these architectures from scratch is the best way to stay ahead of the curve.
+
+\end{document}

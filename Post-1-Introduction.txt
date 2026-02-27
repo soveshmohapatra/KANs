@@ -1,0 +1,29 @@
+It’s time to rethink the fundamental building block of AI: the MLP. 🧠
+
+For decades, we’ve relied on Multi-Layer Perceptrons. The recipe is always the same: multiply inputs by weights, sum them up, and pass them through a fixed activation function (like ReLU). 
+
+But what if the activation function didn't live on the node? What if it lived on the *edge*?
+
+Enter Kolmogorov-Arnold Networks (KANs). 🚀
+
+Unlike standard MLPs, KANs have no linear weight matrices and no fixed activation functions. Instead, every single connection between nodes is a learnable, dynamic 1D function (parameterized as a B-spline). 
+
+Why does this matter?
+✅ Better interpretability (you can actually look at the mathematical curves the network learns).
+✅ Mathematical elegance rooted in the Kolmogorov-Arnold representation theorem.
+✅ The potential to achieve the same accuracy as an MLP with vastly fewer parameters, especially in scientific and mathematical tasks.
+
+As someone who loves dissecting the mathematical foundations of Deep Learning, I couldn't resist digging into how this actually works under the hood. 
+
+So, I’m launching a new 3-part "Build in Public" mini-series deconstructing KANs from theory to code:
+1️⃣ Part 1 (Today): The fundamental math (Splines & The Kolmogorov-Arnold Theorem)
+2️⃣ Part 2: Writing a 1D KAN layer in pure PyTorch
+3️⃣ Part 3: Benchmarking KANs vs. MLPs on curve-fitting tasks
+
+I’ll be sharing the intuition, the PyTorch implementation, and the performance trade-offs. 
+
+If you're an AI engineer, researcher, or just someone who loves getting under the hood of neural architectures—follow along. 
+
+Drop a "👋" in the comments if you want me to tag you when the PyTorch code drops in Part 2!
+
+#DeepLearning #MachineLearning #ArtificialIntelligence #PyTorch #NeuralNetworks #KAN #KolmogorovArnoldNetworks #BuildInPublic
