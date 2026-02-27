@@ -51,4 +51,4 @@ python kan_benchmark.py
 ## Articles and Posts
 The detailed LaTeX write-ups and LinkedIn posts for the series are available locally in this repository. 
 
-Follow along on [LinkedIn](https://www.linkedin.com/in/sovesh) for more architectures built from scratch!
+Follow along on [LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7433288258555559936/?originTrackingId=wbYeW09IWVWVb4umQt1%2FMA%3D%3D) for more architectures built from scratch!
